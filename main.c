@@ -34,8 +34,8 @@ static void* server(void* arg) {
 
   {
     int val = 1;
-    assert(setsockopt(fd, 1, 2, &val, sizeof(val)) == 0);
-    assert(setsockopt(fd, 6, 1, &val, sizeof(val)) == 0);
+    assert(setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)) == 0);
+    assert(setsockopt(fd, SOL_TCP,    TCP_NODELAY,  &val, sizeof(val)) == 0);
   }
 
   struct sockaddr_in sa;
@@ -74,14 +74,7 @@ static void* client(void* arg) {
 
   int fd = socket(PF_INET, SOCK_STREAM, 6);
 
-  assert(fcntl(fd, 0x1, 0x6) == 0);
-  assert(fcntl(fd, 0x2, 0x1) == 0);
-
-  {
-    int val = 1024 * 5;
-    setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
-    setsockopt(fd, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
-  }
+  assert(fcntl(fd, F_SETFD, FD_CLOEXEC) == 0);
 
   struct sockaddr_in sa;
   sa.sin_family      = AF_INET;
