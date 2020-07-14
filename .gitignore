@@ -1,0 +1,6 @@
+/.*
+/*.core
+/client
+/server
+/client_seq.c
+/server_seq.c
