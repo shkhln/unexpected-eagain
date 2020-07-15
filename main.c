@@ -53,7 +53,9 @@ static void* server(void* arg) {
 
   if (nbytes == -1) {
     perror("[server] send");
-    assert(errno != EAGAIN);
+    if (errno == EAGAIN) {
+      exit(EXIT_FAILURE);
+    }
     goto cleanup;
   }
 
@@ -63,7 +65,9 @@ static void* server(void* arg) {
 
   if (nbytes == -1) {
     perror("[server] send");
-    assert(errno != EAGAIN);
+    if (errno == EAGAIN) {
+      exit(EXIT_FAILURE);
+    }
     goto cleanup;
   }
 
@@ -107,12 +111,13 @@ static void* client(void* arg) {
     }
 
     if (send(fd, buf, 1, 0) == -1) {
-      exit(0);
+      goto cleanup;
     }
 
     usleep(250000);
   }
 
+cleanup:
   close(fd);
 
   return NULL;
