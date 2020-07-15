@@ -49,10 +49,26 @@ static void* server(void* arg) {
   int cfd = accept(fd, NULL, NULL);
   printf("connection accepted\n");
 
-  char buf[500000];
+  char* buf = malloc(1024 * 1024);
+
   ssize_t nbytes = -1;
 
-  #include "server_seq.c"
+  SND_AND_LOG(__func__, cfd, buf, 654954);
+  if (nbytes == -1) {
+    perror("[server] send");
+    assert(errno != EAGAIN);
+    goto cleanup;
+  }
+
+  SND_AND_LOG(__func__, cfd, buf, 573290);
+  if (nbytes == -1) {
+    perror("[server] send");
+    assert(errno != EAGAIN);
+    goto cleanup;
+  }
+
+cleanup:
+  free(buf);
 
   close(cfd);
   close(fd);
