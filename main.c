@@ -15,12 +15,6 @@
 #define PORT 57343
 #define HOST (((((1 << 8) | 0) << 8) | 0) << 8) | 127
 
-#define RCV_AND_LOG(id, fd, buf, buf_size)\
-  (printf("[%s] Receiving %d bytes...\n", id, buf_size), nbytes = recv(fd, buf, buf_size, 0),            printf("[%s] received: %zd\n", id, nbytes))
-
-#define SND_AND_LOG(id, fd, buf, buf_size)\
-  (printf("[%s] Sending %d bytes...\n",   id, buf_size), nbytes = send(fd, buf, buf_size, MSG_NOSIGNAL), printf("[%s] sent: %zd\n",     id, nbytes))
-
 #ifdef SERVER
 
 static void* server(void* arg) {
@@ -53,14 +47,20 @@ static void* server(void* arg) {
 
   ssize_t nbytes = -1;
 
-  SND_AND_LOG(__func__, cfd, buf, 654954);
+  printf("[server] Sending %d bytes...\n", 654954);
+  nbytes = send(cfd, buf, 654954, MSG_NOSIGNAL);
+  printf("[server] sent: %zd\n", nbytes);
+
   if (nbytes == -1) {
     perror("[server] send");
     assert(errno != EAGAIN);
     goto cleanup;
   }
 
-  SND_AND_LOG(__func__, cfd, buf, 573290);
+  printf("[server] Sending %d bytes...\n", 573290);
+  nbytes = send(cfd, buf, 573290, MSG_NOSIGNAL);
+  printf("[server] sent: %zd\n", nbytes);
+
   if (nbytes == -1) {
     perror("[server] send");
     assert(errno != EAGAIN);
