@@ -21,13 +21,6 @@
 #define SND_AND_LOG(id, fd, buf, buf_size)\
   (printf("[%s] Sending %d bytes...\n",   id, buf_size), nbytes = send(fd, buf, buf_size, MSG_NOSIGNAL), printf("[%s] sent: %zd\n",     id, nbytes))
 
-#define SERVER_SLEEP_INTERVAL 100000
-#define CLIENT_SLEEP_INTERVAL 150000
-
-#ifndef SOL_TCP
-#define SOL_TCP IPPROTO_TCP
-#endif
-
 #ifdef SERVER
 
 static void* server(void* arg) {
@@ -39,7 +32,6 @@ static void* server(void* arg) {
   {
     int val = 1;
     assert(setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)) == 0);
-    assert(setsockopt(fd, SOL_TCP,    TCP_NODELAY,  &val, sizeof(val)) == 0);
   }
 
   struct sockaddr_in sa;
@@ -90,10 +82,20 @@ static void* client(void* arg) {
     exit(EXIT_FAILURE);
   }
 
-  char buf[500000];
-  ssize_t nbytes = -1;
+  char buf[1024];
 
-  #include "client_seq.c"
+  while (1) {
+
+    while (recv(fd, buf, 1024, 0) > 0) {
+      // do nothing
+    }
+
+    if (send(fd, buf, 1, 0) == -1) {
+      exit(0);
+    }
+
+    usleep(250000);
+  }
 
   close(fd);
 
