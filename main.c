@@ -24,6 +24,10 @@
 #define SERVER_SLEEP_INTERVAL 100000
 #define CLIENT_SLEEP_INTERVAL 150000
 
+#ifndef SOL_TCP
+#define SOL_TCP IPPROTO_TCP
+#endif
+
 #ifdef SERVER
 
 static void* server(void* arg) {
@@ -54,7 +58,6 @@ static void* server(void* arg) {
   printf("connection accepted\n");
 
   char buf[500000];
-
   ssize_t nbytes = -1;
 
   #include "server_seq.c"
@@ -70,6 +73,7 @@ static void* server(void* arg) {
 #ifdef CLIENT
 
 static void* client(void* arg) {
+
   printf("%s started\n", __func__);
 
   int fd = socket(PF_INET, SOCK_STREAM, 6);
@@ -87,7 +91,6 @@ static void* client(void* arg) {
   }
 
   char buf[500000];
-
   ssize_t nbytes = -1;
 
   #include "client_seq.c"
