@@ -41,34 +41,23 @@ static void* server(void* arg) {
   assert(listen(fd, 1) == 0);
 
   int cfd = accept(fd, NULL, NULL);
+  assert(cfd != -1);
   printf("connection accepted\n");
 
   char* buf = malloc(1024 * 1024);
 
-  ssize_t nbytes = -1;
+  for (int i = 0; i < 10; i++) {
+    printf("[server] Sending %d bytes...\n", 100000);
+    ssize_t nbytes = send(cfd, buf, 100000, MSG_NOSIGNAL);
+    printf("[server] sent: %zd\n", nbytes);
 
-  printf("[server] Sending %d bytes...\n", 654954);
-  nbytes = send(cfd, buf, 654954, MSG_NOSIGNAL);
-  printf("[server] sent: %zd\n", nbytes);
-
-  if (nbytes == -1) {
-    perror("[server] send");
-    if (errno == EAGAIN) {
-      exit(EXIT_FAILURE);
+    if (nbytes == -1) {
+      perror("[server] send");
+      if (errno == EAGAIN) {
+        exit(EXIT_FAILURE);
+      }
+      goto cleanup;
     }
-    goto cleanup;
-  }
-
-  printf("[server] Sending %d bytes...\n", 573290);
-  nbytes = send(cfd, buf, 573290, MSG_NOSIGNAL);
-  printf("[server] sent: %zd\n", nbytes);
-
-  if (nbytes == -1) {
-    perror("[server] send");
-    if (errno == EAGAIN) {
-      exit(EXIT_FAILURE);
-    }
-    goto cleanup;
   }
 
 cleanup:
@@ -110,7 +99,7 @@ static void* client(void* arg) {
       // do nothing
     }
 
-    if (send(fd, buf, 1, 0) == -1) {
+    if (send(fd, buf, 1, MSG_NOSIGNAL) == -1) {
       goto cleanup;
     }
 
@@ -132,11 +121,12 @@ int main() {
   pthread_create(&st, NULL, server, NULL);
 #endif
 
+  usleep(10000);
+
 #ifdef CLIENT
   pthread_t ct;
   pthread_create(&ct, NULL, client, NULL);
 #else
-  usleep(10000);
   system("./client");
 #endif
 
